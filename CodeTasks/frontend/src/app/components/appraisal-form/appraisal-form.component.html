@@ -1,0 +1,123 @@
+<div class="section">
+  <h2 class="section-title">Check-In Bereich</h2>
+  <div class="field-row">
+    <label>Kundenname:</label>
+    <input
+      type="text"
+      [value]="data.formData.customerName"
+      [disabled]="!data.permissions.fields.customerName"
+      (blur)="onFieldBlur('customerName', $event)"
+    />
+  </div>
+  <div class="field-row">
+    <label>Fahrzeugtyp:</label>
+    <input
+      type="text"
+      [value]="data.formData.vehicleType"
+      [disabled]="!data.permissions.fields.vehicleType"
+      (blur)="onFieldBlur('vehicleType', $event)"
+    />
+  </div>
+  <div class="field-row">
+    <label>Kennzeichen:</label>
+    <input
+      type="text"
+      [value]="data.formData.licensePlate"
+      [disabled]="!data.permissions.fields.licensePlate"
+      (blur)="onFieldBlur('licensePlate', $event)"
+    />
+  </div>
+  <div class="action-row">
+    <button
+      class="btn btn-primary"
+      [disabled]="!data.permissions.actions.RELEASE_APPRAISAL"
+      (click)="triggerAction('RELEASE_APPRAISAL')"
+    >
+      Bewertung freigeben
+    </button>
+  </div>
+</div>
+
+<hr class="section-divider" />
+
+<div class="section">
+  <h2 class="section-title">Bewerter Bereich</h2>
+  <div class="checkbox-group">
+    <label class="checkbox-label">
+      <input
+        type="checkbox"
+        [checked]="data.formData.damages.windshield"
+        [disabled]="!data.permissions.fields.damages"
+        (change)="onDamageChange('windshield', $event)"
+      />
+      Scheibe
+    </label>
+    <label class="checkbox-label">
+      <input
+        type="checkbox"
+        [checked]="data.formData.damages.paint"
+        [disabled]="!data.permissions.fields.damages"
+        (change)="onDamageChange('paint', $event)"
+      />
+      Lack
+    </label>
+    <label class="checkbox-label">
+      <input
+        type="checkbox"
+        [checked]="data.formData.damages.rim"
+        [disabled]="!data.permissions.fields.damages"
+        (change)="onDamageChange('rim', $event)"
+      />
+      Felge
+    </label>
+    <label class="checkbox-label">
+      <input
+        type="checkbox"
+        [checked]="data.formData.damages.technical"
+        [disabled]="!data.permissions.fields.damages"
+        (change)="onDamageChange('technical', $event)"
+      />
+      Technik
+    </label>
+  </div>
+  <div class="action-row">
+    <button
+      class="btn btn-primary"
+      [disabled]="!data.permissions.actions.CLOSE_APPRAISAL"
+      (click)="triggerAction('CLOSE_APPRAISAL')"
+    >
+      Bewertung abschließen
+    </button>
+  </div>
+</div>
+
+<hr class="section-divider" />
+
+<div class="section">
+  <h2 class="section-title">Checkout Bereich</h2>
+  <div class="action-row">
+    <button
+      class="btn btn-primary"
+      [disabled]="!data.permissions.fields.submitButton"
+      (click)="onSubmit()"
+    >
+      Absenden
+    </button>
+    <button
+      class="btn btn-danger"
+      [disabled]="!data.permissions.fields.rejectButton"
+      (click)="onReject()"
+    >
+      Ablehnen
+    </button>
+  </div>
+</div>
+
+<hr class="section-divider" />
+
+<div class="section">
+  <h2 class="section-title">Admin Bereich</h2>
+  <div class="action-row">
+    <button class="btn btn-neutral" (click)="onReset()">Reset</button>
+  </div>
+</div>

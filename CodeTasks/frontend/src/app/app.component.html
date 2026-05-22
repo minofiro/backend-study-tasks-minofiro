@@ -1,0 +1,80 @@
+<header class="app-header">
+  <h1 class="app-title">Vehicle Appraisal App</h1>
+  <nav class="tab-nav">
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'aufgabe1'"
+      (click)="activeTab = 'aufgabe1'"
+    >Aufgabe 1</button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'aufgabe2'"
+      (click)="activeTab = 'aufgabe2'"
+    >Aufgabe 2</button>
+  </nav>
+</header>
+
+<main class="tab-content">
+  <!-- Aufgabe 1 -->
+  <div *ngIf="activeTab === 'aufgabe1'">
+    <div class="controls">
+      <label for="roleSelect">Aktuelle Rolle:</label>
+      <select id="roleSelect" [value]="selectedRole" (change)="onRoleChange($event)">
+        <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+      </select>
+      <span class="status-badge">Status: {{ appraisalData?.state ?? 'Laden...' }}</span>
+    </div>
+
+    <hr />
+
+    <app-appraisal-form
+      *ngIf="appraisalData"
+      [data]="appraisalData"
+      [selectedRole]="selectedRole"
+      (actionTriggered)="onAction($event)"
+      (formChanged)="onFormChange($event)"
+      (resetTriggered)="onReset()"
+    ></app-appraisal-form>
+  </div>
+
+  <!-- Aufgabe 2 -->
+  <div *ngIf="activeTab === 'aufgabe2'">
+    <div class="a2-container">
+      <h2 class="a2-title">Dokumentensuche</h2>
+
+      <div class="a2-input-row">
+        <label for="finInput" class="a2-label">Fahrzeugidentifikationsnummer (FIN)</label>
+        <input
+          id="finInput"
+          type="text"
+          class="a2-input"
+          [(ngModel)]="fin"
+          placeholder="z. B. 123 oder 456"
+        />
+      </div>
+
+      <div class="a2-actions">
+        <button class="btn btn-primary" (click)="onLoadDocuments()">Dokumente anzeigen</button>
+        <button class="btn btn-secondary" (click)="onDownloadReport()">Bewertungsprotokoll herunterladen</button>
+      </div>
+
+      <div *ngIf="documentsLoaded" class="a2-results">
+        <p *ngIf="documents.length === 0" class="a2-empty">Keine Dokumente für diese FIN gefunden.</p>
+        <table *ngIf="documents.length > 0" class="doc-table">
+          <thead>
+            <tr>
+              <th>Dateiname</th>
+              <th>Dokumentenart</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let doc of documents">
+              <td>{{ doc.filename }}</td>
+              <td>{{ doc.documentType }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
