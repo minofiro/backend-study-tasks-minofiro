@@ -1,6 +1,9 @@
 import * as http from 'http';
 import * as fs from 'fs';
+<<<<<<< HEAD
 import * as path from 'path';
+=======
+>>>>>>> 068c18d (Initial commit)
 import { AppraisalAction, UserRole } from './interfaces';
 import {
   getAppraisal,
@@ -108,6 +111,7 @@ export function createController(): http.RequestListener {
 
     // GET /documents?fin=<FIN>
     if (method === 'GET' && url.startsWith('/documents') && !url.startsWith('/documents/download')) {
+<<<<<<< HEAD
       const urlObj = new URL(url, 'http://localhost');
       const fin = urlObj.searchParams.get('fin');
       
@@ -118,11 +122,16 @@ export function createController(): http.RequestListener {
 
       const documents = listDocumentsByFin(fin);
       sendJson(res, 200, documents);
+=======
+      // TODO Story 2: Implement document listing
+      sendJson(res, 501, { error: 'Not implemented' });
+>>>>>>> 068c18d (Initial commit)
       return;
     }
 
     // GET /documents/download?fin=<FIN>
     if (method === 'GET' && url.startsWith('/documents/download')) {
+<<<<<<< HEAD
       const urlObj = new URL(url, 'http://localhost');
       const fin = urlObj.searchParams.get('fin');
       
@@ -147,6 +156,10 @@ export function createController(): http.RequestListener {
 
       const readStream = fs.createReadStream(reportPath);
       readStream.pipe(res);
+=======
+      // TODO Story 2: Implement PDF download
+      sendJson(res, 501, { error: 'Not implemented' });
+>>>>>>> 068c18d (Initial commit)
       return;
     }
 

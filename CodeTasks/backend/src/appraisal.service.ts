@@ -24,6 +24,7 @@ let formData: AppraisalFormData = {
 };
 
 function buildPermissions(role: UserRole): Permissions {
+<<<<<<< HEAD
   if (role === UserRole.CHECK_IN && currentState === AppraisalState.TAKE_IN) {
     return {
       actions: {
@@ -78,6 +79,9 @@ function buildPermissions(role: UserRole): Permissions {
       },
     };
   }
+=======
+  // TODO Story 1: Implement permission logic according to the current state and role
+>>>>>>> 068c18d (Initial commit)
   return {
     actions: {
       [AppraisalAction.RELEASE_APPRAISAL]: false,
@@ -86,12 +90,21 @@ function buildPermissions(role: UserRole): Permissions {
       [AppraisalAction.DENY_APPRAISAL]: false,
     },
     fields: {
+<<<<<<< HEAD
     customerName: false,
     vehicleType: false,
     licensePlate: false,
     damages: false,
     submitButton: false,
     rejectButton: false,
+=======
+      customerName: false,
+      vehicleType: false,
+      licensePlate: false,
+      damages: false,
+      submitButton: false,
+      rejectButton: false,
+>>>>>>> 068c18d (Initial commit)
     },
   };
 }
