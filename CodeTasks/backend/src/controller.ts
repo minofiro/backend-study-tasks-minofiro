@@ -1,5 +1,6 @@
 import * as http from 'http';
 import * as fs from 'fs';
+import * as path from 'path';
 import { AppraisalAction, UserRole } from './interfaces';
 import {
   getAppraisal,
@@ -107,15 +108,45 @@ export function createController(): http.RequestListener {
 
     // GET /documents?fin=<FIN>
     if (method === 'GET' && url.startsWith('/documents') && !url.startsWith('/documents/download')) {
-      // TODO Story 2: Implement document listing
-      sendJson(res, 501, { error: 'Not implemented' });
+      const urlObj = new URL(url, 'http://localhost');
+      const fin = urlObj.searchParams.get('fin');
+      
+      if (!fin) {
+        sendJson(res, 400, { error: 'Missing fin query parameter.' });
+        return;
+      }
+
+      const documents = listDocumentsByFin(fin);
+      sendJson(res, 200, documents);
       return;
     }
 
     // GET /documents/download?fin=<FIN>
     if (method === 'GET' && url.startsWith('/documents/download')) {
-      // TODO Story 2: Implement PDF download
-      sendJson(res, 501, { error: 'Not implemented' });
+      const urlObj = new URL(url, 'http://localhost');
+      const fin = urlObj.searchParams.get('fin');
+      
+      if (!fin) {
+        sendJson(res, 400, { error: 'Missing fin query parameter.' });
+        return;
+      }
+
+      const reportPath = getAppraisalReportPath(fin);
+
+      if (!reportPath || !fs.existsSync(reportPath)) {
+        sendJson(res, 404, { error: 'Bewertungsprotokoll not found for the given FIN.' });
+        return;
+      }
+
+      const filename = path.basename(reportPath);
+      res.writeHead(200, {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="${filename}"`,
+        'Access-Control-Allow-Origin': '*',
+      });
+
+      const readStream = fs.createReadStream(reportPath);
+      readStream.pipe(res);
       return;
     }
 
