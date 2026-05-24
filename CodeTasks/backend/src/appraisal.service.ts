@@ -24,7 +24,60 @@ let formData: AppraisalFormData = {
 };
 
 function buildPermissions(role: UserRole): Permissions {
-  // TODO Story 1: Implement permission logic according to the current state and role
+  if (role === UserRole.CHECK_IN && currentState === AppraisalState.TAKE_IN) {
+    return {
+      actions: {
+        [AppraisalAction.RELEASE_APPRAISAL]: true,
+        [AppraisalAction.CLOSE_APPRAISAL]: false,
+        [AppraisalAction.APPROVE_APPRAISAL]: false,
+        [AppraisalAction.DENY_APPRAISAL]: false,
+      },
+      fields: {
+      customerName: true,
+      vehicleType: true,
+      licensePlate: true,
+      damages: false,
+      submitButton: false,
+      rejectButton: false,
+      },
+    };
+  }
+  else if (role === UserRole.APPRAISER&& currentState === AppraisalState.READY_FOR_APPRAISAL) {
+    return {
+      actions: {
+        [AppraisalAction.RELEASE_APPRAISAL]: false,
+        [AppraisalAction.CLOSE_APPRAISAL]: true,
+        [AppraisalAction.APPROVE_APPRAISAL]: false,
+        [AppraisalAction.DENY_APPRAISAL]: false,
+      },
+      fields: {
+      customerName: false,
+      vehicleType: false,
+      licensePlate: false,
+      damages: true,
+      submitButton: false,
+      rejectButton: false,
+      },
+    };
+  }
+  else if (role === UserRole.CHECKOUT && currentState === AppraisalState.APPRAISAL_CLOSED) {
+    return {
+      actions: {
+        [AppraisalAction.RELEASE_APPRAISAL]: false,
+        [AppraisalAction.CLOSE_APPRAISAL]: false,
+        [AppraisalAction.APPROVE_APPRAISAL]: true,
+        [AppraisalAction.DENY_APPRAISAL]: true,
+      },
+      fields: {
+      customerName: false,
+      vehicleType: false,
+      licensePlate: false,
+      damages: false,
+      submitButton: true,
+      rejectButton: true,
+      },
+    };
+  }
   return {
     actions: {
       [AppraisalAction.RELEASE_APPRAISAL]: false,
@@ -33,12 +86,12 @@ function buildPermissions(role: UserRole): Permissions {
       [AppraisalAction.DENY_APPRAISAL]: false,
     },
     fields: {
-      customerName: false,
-      vehicleType: false,
-      licensePlate: false,
-      damages: false,
-      submitButton: false,
-      rejectButton: false,
+    customerName: false,
+    vehicleType: false,
+    licensePlate: false,
+    damages: false,
+    submitButton: false,
+    rejectButton: false,
     },
   };
 }
