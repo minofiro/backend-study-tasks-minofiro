@@ -24,10 +24,9 @@ let formData: AppraisalFormData = {
 };
 
 function buildPermissions(role: UserRole): Permissions {
-  // Verpackt die Rolle in ein Array, da die StateMachine für potenziell mehrere Rollen ausgelegt ist
   const roles = [role];
 
-  // Evaluiert dynamisch, welche Aktion im aktuellen Zustand mit der übergebenen Rolle erlaubt ist
+  // Evaluiert exakt, ob die Aktion im aktuellen Zustand mit dieser Rolle erlaubt ist
   const canRelease = stateMachine.isActionAllowed(currentState, AppraisalAction.RELEASE_APPRAISAL, roles);
   const canClose = stateMachine.isActionAllowed(currentState, AppraisalAction.CLOSE_APPRAISAL, roles);
   const canApprove = stateMachine.isActionAllowed(currentState, AppraisalAction.APPROVE_APPRAISAL, roles);
@@ -41,12 +40,13 @@ function buildPermissions(role: UserRole): Permissions {
       [AppraisalAction.DENY_APPRAISAL]: canDeny,
     },
     fields: {
-      // Logische Ableitung: Felder sind nur dann bearbeitbar, wenn der Nutzer in der jeweiligen Phase das Recht dazu hat.
-      customerName: currentState === AppraisalState.TAKE_IN && role === UserRole.CHECK_IN,
-      vehicleType: currentState === AppraisalState.TAKE_IN && role === UserRole.CHECK_IN,
-      licensePlate: currentState === AppraisalState.TAKE_IN && role === UserRole.CHECK_IN,
-      damages: currentState === AppraisalState.READY_FOR_APPRAISAL && role === UserRole.APPRAISER,
-      submitButton: canRelease || canClose || canApprove,
+      // KORREKTUR: Felder sind nur editierbar, wenn der State stimmt UND die aktuelle Rolle die Rechte für die nächste Aktion hat.
+      customerName: currentState === AppraisalState.TAKE_IN && canRelease,
+      vehicleType: currentState === AppraisalState.TAKE_IN && canRelease,
+      licensePlate: currentState === AppraisalState.TAKE_IN && canRelease,
+      damages: currentState === AppraisalState.READY_FOR_APPRAISAL && canClose,
+      
+      submitButton: canApprove,
       rejectButton: canDeny,
     },
   };
@@ -64,10 +64,9 @@ export function performAction(
   action: AppraisalAction,
   role: UserRole
 ): { success: boolean; message: string; data?: AppraisalData } {
-  // Übergibt den aktuellen Zustand, die Aktion und die Rolle an die State Machine
   const nextState = stateMachine.getNextState(currentState, action, [role]);
 
-  if (nextState) {
+  if (nextState !== null && nextState !== undefined) {
     currentState = nextState;
     return {
       success: true,
@@ -76,10 +75,9 @@ export function performAction(
     };
   }
 
-  // Fallback, wenn die Aktion für die Rolle oder den Zustand nicht gestattet ist
   return {
     success: false,
-    message: 'Aktion abgelehnt: Entweder falsche Rolle oder ungültiger Zustand.',
+    message: `Aktion abgelehnt. Aktueller Zustand (${currentState}) oder Rolle (${role}) nicht berechtigt für Aktion (${action}).`,
   };
 }
 

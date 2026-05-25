@@ -46,15 +46,18 @@ export class StateMachine {
     action: AppraisalAction,
     userRoles: UserRole[]
   ): boolean {
-    const transition = this.transitions.find(
-      (t) => t.state === currentState && t.action === action
-    );
-    
-    if (!transition) {
+    if (!currentState || !action ||
+    !userRoles) {
       return false;
     }
-    
-    return userRoles.some(role => transition.allowedRoles.includes(role));
+
+    return this.transitions.some(
+      (t) =>
+        t.state === currentState &&
+        t.action === action &&
+        // Prüft, ob mindestens eine Rolle des Nutzers in den erlaubten Rollen der Transition enthalten ist
+        userRoles.some(role => t.allowedRoles.includes(role)) 
+    );
   }
 
   getNextState(
@@ -62,12 +65,12 @@ export class StateMachine {
     action: AppraisalAction,
     userRoles: UserRole[]
   ): AppraisalState | null {
-    if (!this.isActionAllowed(currentState, action, userRoles)) {
-      return null;
-    }
-    
     const transition = this.transitions.find(
-      (t) => t.state === currentState && t.action === action
+      (t) =>
+        t.state === currentState &&
+        t.action === action &&
+        // Gleiche Prüfung wie oben
+        userRoles.some(role => t.allowedRoles.includes(role))
     );
     
     return transition ? transition.nextState : null;
