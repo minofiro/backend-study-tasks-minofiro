@@ -24,87 +24,30 @@ let formData: AppraisalFormData = {
 };
 
 function buildPermissions(role: UserRole): Permissions {
-<<<<<<< HEAD
-  if (role === UserRole.CHECK_IN && currentState === AppraisalState.TAKE_IN) {
-    return {
-      actions: {
-        [AppraisalAction.RELEASE_APPRAISAL]: true,
-        [AppraisalAction.CLOSE_APPRAISAL]: false,
-        [AppraisalAction.APPROVE_APPRAISAL]: false,
-        [AppraisalAction.DENY_APPRAISAL]: false,
-      },
-      fields: {
-      customerName: true,
-      vehicleType: true,
-      licensePlate: true,
-      damages: false,
-      submitButton: false,
-      rejectButton: false,
-      },
-    };
-  }
-  else if (role === UserRole.APPRAISER&& currentState === AppraisalState.READY_FOR_APPRAISAL) {
-    return {
-      actions: {
-        [AppraisalAction.RELEASE_APPRAISAL]: false,
-        [AppraisalAction.CLOSE_APPRAISAL]: true,
-        [AppraisalAction.APPROVE_APPRAISAL]: false,
-        [AppraisalAction.DENY_APPRAISAL]: false,
-      },
-      fields: {
-      customerName: false,
-      vehicleType: false,
-      licensePlate: false,
-      damages: true,
-      submitButton: false,
-      rejectButton: false,
-      },
-    };
-  }
-  else if (role === UserRole.CHECKOUT && currentState === AppraisalState.APPRAISAL_CLOSED) {
-    return {
-      actions: {
-        [AppraisalAction.RELEASE_APPRAISAL]: false,
-        [AppraisalAction.CLOSE_APPRAISAL]: false,
-        [AppraisalAction.APPROVE_APPRAISAL]: true,
-        [AppraisalAction.DENY_APPRAISAL]: true,
-      },
-      fields: {
-      customerName: false,
-      vehicleType: false,
-      licensePlate: false,
-      damages: false,
-      submitButton: true,
-      rejectButton: true,
-      },
-    };
-  }
-=======
-  // TODO Story 1: Implement permission logic according to the current state and role
->>>>>>> 068c18d (Initial commit)
+  // Verpackt die Rolle in ein Array, da die StateMachine für potenziell mehrere Rollen ausgelegt ist
+  const roles = [role];
+
+  // Evaluiert dynamisch, welche Aktion im aktuellen Zustand mit der übergebenen Rolle erlaubt ist
+  const canRelease = stateMachine.isActionAllowed(currentState, AppraisalAction.RELEASE_APPRAISAL, roles);
+  const canClose = stateMachine.isActionAllowed(currentState, AppraisalAction.CLOSE_APPRAISAL, roles);
+  const canApprove = stateMachine.isActionAllowed(currentState, AppraisalAction.APPROVE_APPRAISAL, roles);
+  const canDeny = stateMachine.isActionAllowed(currentState, AppraisalAction.DENY_APPRAISAL, roles);
+
   return {
     actions: {
-      [AppraisalAction.RELEASE_APPRAISAL]: false,
-      [AppraisalAction.CLOSE_APPRAISAL]: false,
-      [AppraisalAction.APPROVE_APPRAISAL]: false,
-      [AppraisalAction.DENY_APPRAISAL]: false,
+      [AppraisalAction.RELEASE_APPRAISAL]: canRelease,
+      [AppraisalAction.CLOSE_APPRAISAL]: canClose,
+      [AppraisalAction.APPROVE_APPRAISAL]: canApprove,
+      [AppraisalAction.DENY_APPRAISAL]: canDeny,
     },
     fields: {
-<<<<<<< HEAD
-    customerName: false,
-    vehicleType: false,
-    licensePlate: false,
-    damages: false,
-    submitButton: false,
-    rejectButton: false,
-=======
-      customerName: false,
-      vehicleType: false,
-      licensePlate: false,
-      damages: false,
-      submitButton: false,
-      rejectButton: false,
->>>>>>> 068c18d (Initial commit)
+      // Logische Ableitung: Felder sind nur dann bearbeitbar, wenn der Nutzer in der jeweiligen Phase das Recht dazu hat.
+      customerName: currentState === AppraisalState.TAKE_IN && role === UserRole.CHECK_IN,
+      vehicleType: currentState === AppraisalState.TAKE_IN && role === UserRole.CHECK_IN,
+      licensePlate: currentState === AppraisalState.TAKE_IN && role === UserRole.CHECK_IN,
+      damages: currentState === AppraisalState.READY_FOR_APPRAISAL && role === UserRole.APPRAISER,
+      submitButton: canRelease || canClose || canApprove,
+      rejectButton: canDeny,
     },
   };
 }
@@ -121,10 +64,22 @@ export function performAction(
   action: AppraisalAction,
   role: UserRole
 ): { success: boolean; message: string; data?: AppraisalData } {
-  // TODO Story 1: Implement state transition execution
+  // Übergibt den aktuellen Zustand, die Aktion und die Rolle an die State Machine
+  const nextState = stateMachine.getNextState(currentState, action, [role]);
+
+  if (nextState) {
+    currentState = nextState;
+    return {
+      success: true,
+      message: `Aktion erfolgreich. Neuer Zustand: ${currentState}`,
+      data: getAppraisal(role),
+    };
+  }
+
+  // Fallback, wenn die Aktion für die Rolle oder den Zustand nicht gestattet ist
   return {
     success: false,
-    message: 'Not implemented',
+    message: 'Aktion abgelehnt: Entweder falsche Rolle oder ungültiger Zustand.',
   };
 }
 

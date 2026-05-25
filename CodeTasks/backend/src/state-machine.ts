@@ -11,7 +11,34 @@ class Transition {
 
 export class StateMachine {
   private transitions: Transition[] = [
-    // TODO Story 1: Implement state transitions
+    // TAKE_IN -> READY_FOR_APPRAISAL
+    new Transition(
+      AppraisalState.TAKE_IN, 
+      AppraisalAction.RELEASE_APPRAISAL, 
+      AppraisalState.READY_FOR_APPRAISAL, 
+      [UserRole.CHECK_IN]
+    ),
+    // READY_FOR_APPRAISAL -> APPRAISAL_CLOSED
+    new Transition(
+      AppraisalState.READY_FOR_APPRAISAL, 
+      AppraisalAction.CLOSE_APPRAISAL, 
+      AppraisalState.APPRAISAL_CLOSED, 
+      [UserRole.APPRAISER]
+    ),
+    // APPRAISAL_CLOSED -> APPRAISAL_APPROVED
+    new Transition(
+      AppraisalState.APPRAISAL_CLOSED, 
+      AppraisalAction.APPROVE_APPRAISAL, 
+      AppraisalState.APPRAISAL_APPROVED, 
+      [UserRole.CHECKOUT]
+    ),
+    // APPRAISAL_CLOSED -> APPRAISAL_DENIED
+    new Transition(
+      AppraisalState.APPRAISAL_CLOSED, 
+      AppraisalAction.DENY_APPRAISAL, 
+      AppraisalState.APPRAISAL_DENIED, 
+      [UserRole.CHECKOUT]
+    )
   ];
 
   isActionAllowed(
@@ -19,8 +46,15 @@ export class StateMachine {
     action: AppraisalAction,
     userRoles: UserRole[]
   ): boolean {
-    // TODO Story 1: Implement logic to check if action is allowed
-    return false;
+    const transition = this.transitions.find(
+      (t) => t.state === currentState && t.action === action
+    );
+    
+    if (!transition) {
+      return false;
+    }
+    
+    return userRoles.some(role => transition.allowedRoles.includes(role));
   }
 
   getNextState(
@@ -28,7 +62,14 @@ export class StateMachine {
     action: AppraisalAction,
     userRoles: UserRole[]
   ): AppraisalState | null {
-    // TODO Story 1: Implement logic to return next state
-    return null;
+    if (!this.isActionAllowed(currentState, action, userRoles)) {
+      return null;
+    }
+    
+    const transition = this.transitions.find(
+      (t) => t.state === currentState && t.action === action
+    );
+    
+    return transition ? transition.nextState : null;
   }
 }
