@@ -31,11 +31,20 @@ export function getDocumentType(filename: string): DocumentType {
 }
 
 export function listDocumentsByFin(fin: string): DocumentInfo[] {
-  // TODO Story 2: Implement filtering logic to return all documents for a given FIN
-  return [];
+  const finFiles = fs.readdirSync(DOCS_DIR).filter(file => file.includes(fin));
+  return finFiles.map(filename => ({
+    filename,
+    documentType: getDocumentType(filename),
+  }));
 }
 
 export function getAppraisalReportPath(fin: string): string | null {
-  // TODO Story 2: Implement logic to find the specific appraisal report for a given FIN
-  return null;
+  const appraisalReport = fs.readdirSync(DOCS_DIR).find(filename => filename.includes(fin))
+  if (appraisalReport && getDocumentType(appraisalReport) === DocumentType.BEWERTUNGSPROTOKOLL) {
+    return path.join(DOCS_DIR, "../TestDocuments", appraisalReport);
+  }
+  else {
+    return null;
+  }
+
 }

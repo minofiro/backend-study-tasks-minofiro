@@ -107,18 +107,30 @@ export function createController(): http.RequestListener {
 
     // GET /documents?fin=<FIN>
     if (method === 'GET' && url.startsWith('/documents') && !url.startsWith('/documents/download')) {
-      // TODO Story 2: Implement document listing
-      sendJson(res, 501, { error: 'Not implemented' });
-      return;
+      const urlObj = new URL(url, 'http://localhost');
+      const fin = urlObj.searchParams.get('fin')
+      if (!fin) {
+        sendJson(res, 400, { error: 'Missing fin query parameter.' });
+        return;
+      }
+      return sendJson(res, 200, listDocumentsByFin(fin));
     }
 
     // GET /documents/download?fin=<FIN>
     if (method === 'GET' && url.startsWith('/documents/download')) {
-      // TODO Story 2: Implement PDF download
-      sendJson(res, 501, { error: 'Not implemented' });
-      return;
+      const urlObj = new URL(url, 'http://localhost');
+      const fin = urlObj.searchParams.get('fin')
+      if (!fin) {
+        sendJson(res, 400, { error: 'Missing fin query parameter.' });
+        return;
+      }
+      const reportPath = getAppraisalReportPath(fin);
+      if (!reportPath) {
+        sendJson(res, 404, { error: 'Appraisal report not found for given FIN.' });
+        return;
+      }
+      const readStream = fs.createReadStream(reportPath);
+      return readStream.pipe(res);
     }
-
-    sendJson(res, 404, { error: 'Not found.' });
-  };
+  }
 }
