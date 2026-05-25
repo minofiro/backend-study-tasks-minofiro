@@ -31,39 +31,11 @@ export function getDocumentType(filename: string): DocumentType {
 }
 
 export function listDocumentsByFin(fin: string): DocumentInfo[] {
-<<<<<<< HEAD
-  if (!fs.existsSync(DOCS_DIR)) {
-    return [];
-  }
-
-  const files = fs.readdirSync(DOCS_DIR);
-
-  return files
-    .filter(file => file.includes(fin) && file.toLowerCase().endsWith('.pdf'))
-    .map(filename => ({
-      filename,
-      documentType: getDocumentType(filename),
-    }));
-}
-
-export function getAppraisalReportPath(fin: string): string | null {
-  const documents = listDocumentsByFin(fin);
-  
-  const appraisalReport = documents.find(
-    doc => doc.documentType === DocumentType.BEWERTUNGSPROTOKOLL
-  );
-
-  if (appraisalReport) {
-    return path.join(DOCS_DIR, appraisalReport.filename);
-  }
-  
-=======
   // TODO Story 2: Implement filtering logic to return all documents for a given FIN
   return [];
 }
 
 export function getAppraisalReportPath(fin: string): string | null {
   // TODO Story 2: Implement logic to find the specific appraisal report for a given FIN
->>>>>>> 068c18d (Initial commit)
   return null;
 }
